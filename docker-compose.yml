@@ -1,0 +1,16 @@
+services:
+  fuelnet-api:
+    build: .
+    container_name: fuelnet-api
+    restart: unless-stopped
+
+    env_file:
+      - .env
+
+    networks:
+      - internal-network
+
+networks:
+  internal-network:
+    external: true
+
