@@ -1,7 +1,7 @@
 package com.epistlecode.FuelNet.controller;
 
 import com.epistlecode.FuelNet.response.HomepageReferencePriceResponse;
-import com.epistlecode.FuelNet.service.interfac.HomepageReferencePriceService;
+import com.epistlecode.FuelNet.service.HomepageReferencePriceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

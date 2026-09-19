@@ -1,16 +1,33 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: fuelnet-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: fuelnet
+      POSTGRES_USER: ${DB_USERNAME:-fuelnet}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-fuelnet}
+    volumes:
+      - fuelnet-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-fuelnet} -d fuelnet"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   fuelnet-api:
     build: .
     container_name: fuelnet-api
     restart: unless-stopped
-
     env_file:
       - .env
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/fuelnet
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
 
-    networks:
-      - internal-network
-
-networks:
-  internal-network:
-    external: true
-
+volumes:
+  fuelnet-pgdata:

@@ -1,4 +1,4 @@
-package com.epistlecode.FuelNet.service.interfac;
+package com.epistlecode.FuelNet.service;
 
 import com.epistlecode.FuelNet.response.HomepageReferencePriceResponse;
 

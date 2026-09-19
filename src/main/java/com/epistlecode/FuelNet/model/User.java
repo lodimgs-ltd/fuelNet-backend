@@ -1,6 +1,5 @@
 package com.epistlecode.FuelNet.model;
 
-import com.epistlecode.FuelNet.annotations.UniqueEmail;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -17,7 +16,6 @@ public class User {
 
     private String fullName;
 
-//    @UniqueEmail
     private String email;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)

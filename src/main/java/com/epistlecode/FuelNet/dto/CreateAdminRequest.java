@@ -1,4 +1,4 @@
-package com.epistlecode.FuelNet.request;
+package com.epistlecode.FuelNet.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -6,8 +6,8 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
-public class CreateUserRequest {
-    @NotBlank(message = "Your name is required")
+public class CreateAdminRequest {
+    @NotBlank(message = "Full name is required")
     private String fullName;
 
     @NotBlank(message = "Email is required")
