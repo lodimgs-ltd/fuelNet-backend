@@ -76,11 +76,11 @@ public class DataInitializer {
             if (stationRepository.count() == 0) {
                 for (SeedStation seed : SEED_STATIONS) {
                     Station station = createStation(seed);
-                    createOpeningPrice(station, pms, seed.pms(), admin);
-                    createOpeningPrice(station, diesel, seed.diesel(), admin);
-                    createOpeningPrice(station, kerosene, seed.kerosene(), admin);
+                    seedHistory(station, pms, seed.pms(), admin);
+                    seedHistory(station, diesel, seed.diesel(), admin);
+                    seedHistory(station, kerosene, seed.kerosene(), admin);
                 }
-                log.info("Seeded {} stations with opening prices", SEED_STATIONS.size());
+                log.info("Seeded {} stations with two weeks of price history", SEED_STATIONS.size());
             }
 
             backfillLegacyPrices();
@@ -129,15 +129,39 @@ public class DataInitializer {
         return stationRepository.save(station);
     }
 
-    private void createOpeningPrice(Station station, FuelType fuelType, double price, User admin) {
-        FuelPrice fuelPrice = new FuelPrice();
-        fuelPrice.setStation(station);
-        fuelPrice.setFuelType(fuelType);
-        fuelPrice.setPrice(price);
-        fuelPrice.setPreviousPrice(null);
-        fuelPrice.setSetBy(admin);
-        fuelPrice.setCreatedAt(now());
-        fuelPriceRepository.save(fuelPrice);
+    /**
+     * Backdated changes ending at today's price, so trend charts and
+     * week-over-week analytics have something to show on a fresh database.
+     * Offsets are in days ago; deltas are relative to the final price.
+     */
+    private static final int[] HISTORY_DAYS_AGO = {14, 9, 5, 0};
+
+    private void seedHistory(Station station, FuelType fuelType, double finalPrice, User admin) {
+        // Deterministic per station/fuel so restarts don't change the story.
+        int seed = (int) ((station.getName().hashCode() ^ fuelType.getName().hashCode()) & 0x7fffffff);
+        double[] deltas = {
+                +15 + (seed % 20),        // two weeks ago: higher
+                +5 + (seed % 10),         // nine days ago
+                -5 - (seed % 8),          // five days ago: dipped
+                0                         // today: the seed price
+        };
+        Double previous = null;
+        for (int i = 0; i < HISTORY_DAYS_AGO.length; i++) {
+            double price = Math.round(finalPrice + deltas[i]);
+            FuelPrice fuelPrice = new FuelPrice();
+            fuelPrice.setStation(station);
+            fuelPrice.setFuelType(fuelType);
+            fuelPrice.setPrice(price);
+            fuelPrice.setPreviousPrice(previous);
+            fuelPrice.setSetBy(admin);
+            fuelPrice.setCreatedAt(daysAgo(HISTORY_DAYS_AGO[i]));
+            fuelPriceRepository.save(fuelPrice);
+            previous = price;
+        }
+    }
+
+    private static Timestamp daysAgo(int days) {
+        return Timestamp.from(java.time.Instant.now().minus(java.time.Duration.ofDays(days)));
     }
 
     /**

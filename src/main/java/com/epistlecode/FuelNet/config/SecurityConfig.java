@@ -54,16 +54,22 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .headers(h -> h.frameOptions(f -> f.sameOrigin())) // H2 console renders in a frame
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // auth
                         .requestMatchers(HttpMethod.POST, "/api/user", "/api/user/login").permitAll()
-                        // admin-only reads must come before the public GET wildcard
+                        // admin-only reads must come before the public GET wildcards
                         .requestMatchers(HttpMethod.GET, "/api/fuelPrice/audit").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/analytics/overview", "/api/analytics/admin-activity").hasRole("ADMIN")
                         // public read-only data
-                        .requestMatchers(HttpMethod.GET, "/api/fuelPrice/**", "/api/stations/**", "/api/homepage/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/fuelPrice/**", "/api/stations/**", "/api/homepage/**", "/api/analytics/**").permitAll()
+                        // public alert subscriptions
+                        .requestMatchers(HttpMethod.POST, "/api/alerts", "/api/alerts/unsubscribe/*").permitAll()
                         // docs + health
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/actuator/health").permitAll()
+                        // H2 console (only enabled under the dev profile)
+                        .requestMatchers("/h2-console/**").permitAll()
                         // admin-only writes
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/fuelPrice/**", "/api/stations/**").hasRole("ADMIN")

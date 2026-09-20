@@ -3,9 +3,9 @@ spring:
     name: FuelNet
 
   datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: ${DB_URL:jdbc:postgresql://ep-snowy-cake-adjc3va7-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require}
+    username: ${DB_USERNAME:neondb_owner}
+    password: ${DB_PASSWORD:npg_Cs2aOo5XFYRp}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -26,6 +26,13 @@ app:
   seed:
     admin-email: ${SEED_ADMIN_EMAIL:admin@fuelnet.com}
     admin-password: ${SEED_ADMIN_PASSWORD:admin123}
+  # Public site URL, used to build unsubscribe links in alert emails.
+  public-base-url: ${PUBLIC_BASE_URL:http://localhost:5173}
+  alerts:
+    # Safety-net sweep interval; alerts are also evaluated immediately on every price change.
+    sweep-ms: ${ALERT_SWEEP_MS:900000}
+  mail:
+    from: ${MAIL_FROM:no-reply@fuelnet.local}
 
 springdoc:
   swagger-ui:

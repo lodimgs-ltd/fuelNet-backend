@@ -32,5 +32,6 @@ class FuelNetApplicationTests {
         assertThat(stationRepository.count()).isGreaterThan(0);
         // every seeded station gets an opening price for each of the 3 fuel types
         assertThat(fuelPriceRepository.findCurrentPrices()).hasSize((int) stationRepository.count() * 3);
+        assertThat(fuelPriceRepository.count()).isEqualTo(stationRepository.count() * 3 * 4);
     }
 }

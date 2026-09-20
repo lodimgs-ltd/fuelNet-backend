@@ -32,6 +32,7 @@ class FuelPriceServiceImplTest {
     @Mock FuelPriceRepository fuelPriceRepository;
     @Mock FuelTypeRepository fuelTypeRepository;
     @Mock StationRepository stationRepository;
+    @Mock org.springframework.context.ApplicationEventPublisher events;
 
     FuelPriceServiceImpl service;
 
@@ -41,7 +42,7 @@ class FuelPriceServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        service = new FuelPriceServiceImpl(fuelPriceRepository, fuelTypeRepository, stationRepository);
+        service = new FuelPriceServiceImpl(fuelPriceRepository, fuelTypeRepository, stationRepository, events);
 
         station = new Station();
         station.setId(1L);

@@ -3,6 +3,7 @@ package com.epistlecode.FuelNet.service.impl;
 import com.epistlecode.FuelNet.dto.FuelPriceResponse;
 import com.epistlecode.FuelNet.dto.PageResponse;
 import com.epistlecode.FuelNet.dto.RecordPriceRequest;
+import com.epistlecode.FuelNet.event.PriceRecordedEvent;
 import com.epistlecode.FuelNet.exception.ResourceNotFoundException;
 import com.epistlecode.FuelNet.model.FuelPrice;
 import com.epistlecode.FuelNet.model.FuelType;
@@ -12,6 +13,7 @@ import com.epistlecode.FuelNet.repository.FuelPriceRepository;
 import com.epistlecode.FuelNet.repository.FuelTypeRepository;
 import com.epistlecode.FuelNet.repository.StationRepository;
 import com.epistlecode.FuelNet.service.FuelPriceService;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -30,13 +32,16 @@ public class FuelPriceServiceImpl implements FuelPriceService {
     private final FuelPriceRepository fuelPriceRepository;
     private final FuelTypeRepository fuelTypeRepository;
     private final StationRepository stationRepository;
+    private final ApplicationEventPublisher events;
 
     public FuelPriceServiceImpl(FuelPriceRepository fuelPriceRepository,
                                 FuelTypeRepository fuelTypeRepository,
-                                StationRepository stationRepository) {
+                                StationRepository stationRepository,
+                                ApplicationEventPublisher events) {
         this.fuelPriceRepository = fuelPriceRepository;
         this.fuelTypeRepository = fuelTypeRepository;
         this.stationRepository = stationRepository;
+        this.events = events;
     }
 
     @Override
@@ -70,7 +75,9 @@ public class FuelPriceServiceImpl implements FuelPriceService {
         record.setSetBy(setBy);
         record.setCreatedAt(new Timestamp(System.currentTimeMillis()));
 
-        return FuelPriceResponse.from(fuelPriceRepository.save(record));
+        FuelPrice saved = fuelPriceRepository.save(record);
+        events.publishEvent(new PriceRecordedEvent(saved));
+        return FuelPriceResponse.from(saved);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.epistlecode.FuelNet.controller;
 
 import com.epistlecode.FuelNet.dto.CreateStationRequest;
+import com.epistlecode.FuelNet.dto.NearbyStationResponse;
 import com.epistlecode.FuelNet.dto.StationResponse;
 import com.epistlecode.FuelNet.model.StationStatus;
 import com.epistlecode.FuelNet.service.StationService;
@@ -32,6 +33,19 @@ public class StationController {
     @Operation(summary = "List stations (active only unless includeInactive=true)")
     public ResponseEntity<List<StationResponse>> list(@RequestParam(defaultValue = "false") boolean includeInactive) {
         return ResponseEntity.ok(stationService.getStations(includeInactive));
+    }
+
+    @GetMapping("/nearby")
+    @SecurityRequirements
+    @Operation(summary = "Active stations near a point with current prices, nearest first "
+            + "(or cheapest first when fuelType is given)")
+    public ResponseEntity<List<NearbyStationResponse>> nearby(
+            @RequestParam double lat,
+            @RequestParam double lng,
+            @RequestParam(defaultValue = "25") double radiusKm,
+            @RequestParam(required = false) String fuelType,
+            @RequestParam(defaultValue = "20") int limit) {
+        return ResponseEntity.ok(stationService.findNearby(lat, lng, radiusKm, fuelType, limit));
     }
 
     @GetMapping("/{id}")
